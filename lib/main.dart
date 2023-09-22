@@ -41,11 +41,12 @@ class WheaterApp extends StatelessWidget {
               return CircularProgressIndicator();
             }
             var dados = snapshot.data;
+            var forecastday = dados['forecast']['forecastday'][0]['hour'] as List<dynamic>;
             return SafeArea(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Text(dados['current']['name'], style: titleStyle),
+                  Text("São José do Rio Preto", style: titleStyle),
                   Column(
                     children: [
                       Container(
@@ -54,8 +55,8 @@ class WheaterApp extends StatelessWidget {
                         height: 96,
                         margin: EdgeInsets.fromLTRB(0, 0, 0, 24),
                       ),
-                      Text(dados['current']['condition']['text'], style: titleStyle),
-                      Text("${dados!['current']['temp_c']}°C", style: temperatureStyle),
+                      Text(dados!['current']['condition']['text'], style: titleStyle),
+                      Text("${dados['current']['temp_c']}°C", style: temperatureStyle),
                     ],
                   ),
                   Container(
@@ -74,14 +75,14 @@ class WheaterApp extends StatelessWidget {
                           children: [
                             Image.asset('images/wind.png'),
                             Text("Wind", style: iconStyle),
-                            Text("19km/h", style: iconStyle),
+                            Text("${dados['current']['wind_kph']}Km/h", style: iconStyle),
                           ],
                         ),
                         Column(
                           children: [
                             Image.asset('images/feels_like.png'),
                             Text("Feels Like", style: iconStyle),
-                            Text("24", style: iconStyle),
+                            Text("${dados['current']['fellslike']}Km/h", style: iconStyle),
                           ],
                         ),
                       ],
@@ -92,18 +93,7 @@ class WheaterApp extends StatelessWidget {
                     // margin: EdgeInsets.only(top: 80),
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: [
-                        ForecastDay("Now", "sol_nublado", 19),
-                        ForecastDay("10 AM", "nublado", 19),
-                        ForecastDay("11 AM", "sol_nublado", 18),
-                        ForecastDay("12 AM", "sol_nublado", 18),
-                        ForecastDay("13 PM", "chuva", 14),
-                        ForecastDay("14 PM", "nublado", 19),
-                        ForecastDay("15 PM", "nublado", 19),
-                        ForecastDay("16 PM", "nublado", 19),
-                        ForecastDay("17 PM", "nublado", 19),
-                        ForecastDay("18 PM", "nublado", 19),
-                      ],
+                      children: forecastday.map((item) => ForecastDay(item['time_epoch'], 'chuva', item['temp_c'])).toList()
                     ),
                   ),
                 ],
@@ -117,11 +107,16 @@ class WheaterApp extends StatelessWidget {
 }
 
 class ForecastDay extends StatelessWidget {
-  String hour;
+  int timeEpoch;
   String image;
   double temperature;
+  String? hour;
 
-  ForecastDay(this.hour, this.image, this.temperature);
+  ForecastDay(this.timeEpoch, this.image, this.temperature) {
+    var data = DateTime.fromMillisecondsSinceEpoch(timeEpoch);
+    hour = data.hour.toString();
+    
+  }
 
   @override
   Widget build(BuildContext context) {
